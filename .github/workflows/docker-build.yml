@@ -3,9 +3,6 @@ name: Build iTop Docker Images
 on:
   push:
     branches: [ main ]
-    paths:
-      - 'itop-versions.json'
-      - 'Dockerfile'
 
 jobs:
   process-images:
