@@ -27,7 +27,7 @@ jobs:
         id: versions-check
         run: |
           # Si le Dockerfile a changé, on rebuild tout
-          if [ "${{ steps.dockerfile-check.outputs.changed }}" != "0" ]; then
+          if [ "${steps.dockerfile-check.outputs.changed}" != "0" ]; then
             echo "rebuild_all=true" >> $GITHUB_OUTPUT
             exit 0
           fi
