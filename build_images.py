@@ -53,17 +53,31 @@ def main():
     
     print(f"Images existantes trouvées: {existing_images}")
     
-    for image in config['images']:
-        image_name = get_image_name(image)
-        if image_name not in existing_images:
-            print(f"Construction de la nouvelle image: {image_name}")
+    # Vérifie si on doit tout rebuilder (Dockerfile modifié)
+    rebuild_all = os.environ.get('REBUILD_ALL', '').lower() == 'true'
+    
+    if rebuild_all:
+        print("Reconstruction de toutes les images (Dockerfile modifié)")
+        for image in config['images']:
+            image_name = get_image_name(image)
             build_image(image)
-            if 'GITHUB_OWNER' in os.environ:  
+            if 'GITHUB_OWNER' in os.environ:
                 push_image(client, image_name)
             print(f"Image construite avec succès: {image_name}")
-        else:
-            print(f"L'image existe déjà, ignorée: {image_name}")
+    else:
+        print("Mode incrémental - construction uniquement des nouvelles images")
+        for image in config['images']:
+            image_name = get_image_name(image)
+            if image_name not in existing_images:
+                print(f"Construction de la nouvelle image: {image_name}")
+                build_image(image)
+                if 'GITHUB_OWNER' in os.environ:
+                    push_image(client, image_name)
+                print(f"Image construite avec succès: {image_name}")
+            else:
+                print(f"L'image existe déjà, ignorée: {image_name}")
     
+    # Nettoyage des images obsolètes
     current_images = {get_image_name(img) for img in config['images']}
     for existing in existing_images:
         if existing not in current_images:
