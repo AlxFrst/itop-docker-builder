@@ -10,22 +10,29 @@ def load_versions() -> Dict:
 
 def get_existing_images(client: docker.DockerClient) -> set:
     return {tag for image in client.images.list() 
-            for tag in image.tags if 'itop:' in tag}
+            for tag in image.tags if 'ghcr.io' in tag}
 
-def build_image(config: Dict) -> None:
+def get_image_name(config: Dict) -> str:
+    # Format: ghcr.io/owner/repository/image:tag
+    owner = os.environ['GITHUB_OWNER'].lower()
+    repo = os.environ['GITHUB_REPOSITORY'].split('/')[1].lower()
+    return f"ghcr.io/{owner}/{repo}/itop:{config['version']}-php{config['php_version']}"
+
+def build_image(config: Dict) -> str:
+    image_name = get_image_name(config)
     cmd = [
         'docker', 'build',
         '--build-arg', f'PHP_VERSION={config["php_version"]}',
         '--build-arg', f'ITOP_VERSION={config["version"]}',
         '--build-arg', f'ITOP_URL={config["archive_url"]}',
-        '-t', config["image_tag"],
+        '-t', image_name,
         '.'
     ]
     subprocess.run(cmd, check=True)
+    return image_name
 
-def push_image(client: docker.DockerClient, tag: str) -> None:
-    repository = f'{os.environ["DOCKER_USERNAME"]}/{tag}'
-    client.images.push(repository)
+def push_image(client: docker.DockerClient, image_name: str) -> None:
+    client.images.push(image_name)
 
 def main():
     client = docker.from_env()
@@ -33,16 +40,17 @@ def main():
     existing_images = get_existing_images(client)
     
     for image in config['images']:
-        if image['image_tag'] not in existing_images:
-            print(f"Building {image['image_tag']}")
+        image_name = get_image_name(image)
+        if image_name not in existing_images:
+            print(f"Building {image_name}")
             build_image(image)
-            push_image(client, image['image_tag'])
-            print(f"Successfully built and pushed {image['image_tag']}")
+            push_image(client, image_name)
+            print(f"Successfully built and pushed {image_name}")
     
     # Cleanup obsolete images
-    current_tags = {img['image_tag'] for img in config['images']}
+    current_images = {get_image_name(img) for img in config['images']}
     for existing in existing_images:
-        if existing not in current_tags:
+        if existing not in current_images:
             print(f"Removing obsolete image: {existing}")
             client.images.remove(existing, force=True)
 

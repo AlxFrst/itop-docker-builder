@@ -3,14 +3,7 @@
     {
       "version": "3.2.0",
       "php_version": "8.1",
-      "archive_url": "https://freefr.dl.sourceforge.net/project/itop/itop/3.2.0/iTop-3.2.0-14524.zip",
-      "image_tag": "itop:3.2.0-php8.1"
-    },
-    {
-      "version": "3.1.0",
-      "php_version": "8.0",
-      "archive_url": "https://freefr.dl.sourceforge.net/project/itop/itop/3.1.0/iTop-3.1.0-10442.zip",
-      "image_tag": "itop:3.1.0-php8.0"
+      "archive_url": "https://freefr.dl.sourceforge.net/project/itop/itop/3.2.0/iTop-3.2.0-14524.zip"
     }
   ]
 }

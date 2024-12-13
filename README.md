@@ -1,6 +1,6 @@
 # iTop Docker Builder
 
-Ce projet permet de générer automatiquement des images Docker pour différentes versions d'iTop avec différentes versions de PHP.
+Ce projet permet de générer automatiquement des images Docker pour différentes versions d'iTop avec différentes versions de PHP. Les images sont publiées sur GitHub Container Registry (ghcr.io).
 
 ## Structure du projet
 
@@ -21,11 +21,10 @@ itop-docker-builder/
    - version : Version d'iTop
    - php_version : Version de PHP
    - archive_url : URL de téléchargement d'iTop
-   - image_tag : Tag de l'image Docker
 
-2. Configurez les secrets GitHub suivants :
-   - `DOCKERHUB_USERNAME` : Votre nom d'utilisateur Docker Hub
-   - `DOCKERHUB_TOKEN` : Votre token d'accès Docker Hub
+2. Permissions GitHub :
+   - Le workflow utilise automatiquement `GITHUB_TOKEN` pour publier les images
+   - Assurez-vous que les "Packages" sont activés dans les paramètres de votre repository
 
 ## Utilisation
 
@@ -40,6 +39,18 @@ itop-docker-builder/
 
 Le workflow GitHub Actions se déclenchera automatiquement à chaque modification du Dockerfile ou du fichier JSON.
 
+## Format des images
+
+Les images sont publiées sous le format :
+```
+ghcr.io/[owner]/[repository]/itop:[version]-php[php_version]
+```
+
+Par exemple :
+```
+ghcr.io/username/itop-docker-builder/itop:3.2.0-php8.1
+```
+
 ## Tests locaux
 
 Pour tester localement :
@@ -47,6 +58,10 @@ Pour tester localement :
 ```bash
 # Installer les dépendances
 pip install docker
+
+# Définir les variables d'environnement
+export GITHUB_OWNER="votre-username"
+export GITHUB_REPOSITORY="votre-username/itop-docker-builder"
 
 # Lancer le script de build
 python build_images.py
